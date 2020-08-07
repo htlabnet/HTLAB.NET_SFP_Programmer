@@ -38,6 +38,11 @@
 #include "settings.h"
 #include "lib_cli.h"
 #include "lib_sfp.h"
+#include "version.h"
+
+const char VERSION[] = VER_BRANCH_STR "-" VER_RUN_NUM_STR "-" VER_RUN_ID_STR " @ " 
+                       VER_YEAR_STR "/" VER_MON_STR "/" VER_DATE_STR "-" 
+                       VER_HOUR_STR ":" VER_MIN_STR ":" VER_SEC_STR;
 
 
 void setup() {
@@ -58,6 +63,8 @@ void setup() {
   cli_command_add("detect", sfp_detect, "Detect SFP I2C Bus");
 
   sfp_begin();
+  show_version();
+  cli_send_return(true);
 }
 
 
@@ -67,6 +74,20 @@ void loop() {
 
 
 void show_version() {
-  Serial.print("  Version: ");
+  Serial.println("######################################################################");
   Serial.println("");
+  Serial.println("    H T L A B . N E T    S F P    P r o g r a m m e r");
+  Serial.println("");
+  Serial.println("      http://htlab.net/");
+  Serial.println("");
+  Serial.println("      Copyright (C) 2020");
+  Serial.println("        Hideto Kikuchi / PJ (@pcjpnet) - http://pc-jp.net/");
+  Serial.println("        Tsukuba Science Inc. - http://www.tsukuba-kagaku.co.jp/");
+  Serial.println("");
+  Serial.print("      F/W Version: ");
+  Serial.print(VERSION);
+  Serial.println("");
+  Serial.println("######################################################################");
+  Serial.flush();
+  delay(10);
 }

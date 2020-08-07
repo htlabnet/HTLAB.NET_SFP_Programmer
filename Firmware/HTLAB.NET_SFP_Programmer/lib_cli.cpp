@@ -22,12 +22,6 @@ void cli_init() {
   cli_send("\ec");
   IO_Stream->flush();
   delay(10);
-  cli_send_return(false);
-  cli_send("HTLAB.NET SFP Programmer");
-  cli_send_return(false);
-  cli_send_return(true);
-  IO_Stream->flush();
-  delay(10);
 }
 
 
