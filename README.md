@@ -1,2 +1,4 @@
-# HTLAB.NET_SFP_Programmer
-HTLAB.NET_SFP_Programmer
+# HTLAB.NET SFP Programmer
+
+http://htlab.net/
+
