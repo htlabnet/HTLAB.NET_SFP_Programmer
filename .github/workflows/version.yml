@@ -29,14 +29,22 @@ jobs:
       run: |
         echo "${{ env.FILE_HEADER }}" > "${{ env.FILE_NAME }}"
         echo "#define VER_RUN_ID ${{ env.RUN_ID }}" >> "${{ env.FILE_NAME }}"
+        echo "#define VER_RUN_ID_STR \"${{ env.RUN_ID }}\"" >> "${{ env.FILE_NAME }}"
         echo "#define VER_RUN_NUM ${{ env.RUN_NUM }}" >> "${{ env.FILE_NAME }}"
-        echo "#define VER_BRANCH ${{ env.BRANCH_NAME }}" >> "${{ env.FILE_NAME }}"
+        echo "#define VER_RUN_NUM_STR \"${{ env.RUN_NUM }}\"" >> "${{ env.FILE_NAME }}"
+        echo "#define VER_BRANCH_STR \"${{ env.BRANCH_NAME }}\"" >> "${{ env.FILE_NAME }}"
         echo "#define VER_YEAR ${{ env.YEAR }}" >> "${{ env.FILE_NAME }}"
+        echo "#define VER_YEAR_STR \"${{ env.YEAR }}\"" >> "${{ env.FILE_NAME }}"
         echo "#define VER_MON ${{ env.MONTH }}" >> "${{ env.FILE_NAME }}"
+        echo "#define VER_MON_STR \"${{ env.MONTH }}\"" >> "${{ env.FILE_NAME }}"
         echo "#define VER_DATE ${{ env.DATE }}" >> "${{ env.FILE_NAME }}"
+        echo "#define VER_DATE_STR \"${{ env.DATE }}\"" >> "${{ env.FILE_NAME }}"
         echo "#define VER_HOUR ${{ env.HOUR }}" >> "${{ env.FILE_NAME }}"
+        echo "#define VER_HOUR_STR \"${{ env.HOUR }}\"" >> "${{ env.FILE_NAME }}"
         echo "#define VER_MIN ${{ env.MINUTE }}" >> "${{ env.FILE_NAME }}"
+        echo "#define VER_MIN_STR \"${{ env.MINUTE }}\"" >> "${{ env.FILE_NAME }}"
         echo "#define VER_SEC ${{ env.SECOND }}" >> "${{ env.FILE_NAME }}"
+        echo "#define VER_SEC_STR \"${{ env.SECOND }}\"" >> "${{ env.FILE_NAME }}"
         echo "${{ env.FILE_FOOTER }}" >> "${{ env.FILE_NAME }}"
     - name: Commit File
       run: |
