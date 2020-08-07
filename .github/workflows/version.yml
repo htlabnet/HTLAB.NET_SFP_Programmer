@@ -1,0 +1,50 @@
+name: Add Version Number
+on: push
+
+env:
+  TZ: "Asia/Tokyo"
+  FILE_NAME: "./Firmware/HTLAB.NET_SFP_Programmer/version.h"
+  FILE_HEADER: "#ifndef VERSION_H\n#define VERSION_H\n"
+  FILE_FOOTER: "\n#endif"
+  RUN_ID: "${{ github.run_id }}"
+  RUN_NUM: "${{ github.run_number }}"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Extract Branch Name
+      shell: bash
+      run: echo "::set-env name=BRANCH_NAME::$(echo ${GITHUB_REF##*/} | sed 's/\//_/g')"
+    - name: Get Current Date
+      run: |
+        echo "::set-env name=YEAR::$(date +'%y')"
+        echo "::set-env name=MONTH::$(date +'%m')"
+        echo "::set-env name=DATE::$(date +'%d')"
+        echo "::set-env name=HOUR::$(date +'%H')"
+        echo "::set-env name=MINUTE::$(date +'%M')"
+        echo "::set-env name=SECOND::$(date +'%S')"
+    - uses: actions/checkout@master
+    - name: Create File
+      run: |
+        echo "${{ env.FILE_HEADER }}" > "${{ env.FILE_NAME }}"
+        echo "#define VER_RUN_ID ${{ env.RUN_ID }}" >> "${{ env.FILE_NAME }}"
+        echo "#define VER_RUN_NUM ${{ env.RUN_NUM }}" >> "${{ env.FILE_NAME }}"
+        echo "#define VER_BRANCH ${{ env.BRANCH_NAME }}" >> "${{ env.FILE_NAME }}"
+        echo "#define VER_YEAR ${{ env.YEAR }}" >> "${{ env.FILE_NAME }}"
+        echo "#define VER_MON ${{ env.MONTH }}" >> "${{ env.FILE_NAME }}"
+        echo "#define VER_DATE ${{ env.DATE }}" >> "${{ env.FILE_NAME }}"
+        echo "#define VER_HOUR ${{ env.HOUR }}" >> "${{ env.FILE_NAME }}"
+        echo "#define VER_MIN ${{ env.MINUTE }}" >> "${{ env.FILE_NAME }}"
+        echo "#define VER_SEC ${{ env.SECOND }}" >> "${{ env.FILE_NAME }}"
+        echo "${{ env.FILE_FOOTER }}" >> "${{ env.FILE_NAME }}"
+    - name: Commit File
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add ${{ env.FILE_NAME }}
+        git commit -m "Add Version Number" -a
+    - name: Push Change
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
