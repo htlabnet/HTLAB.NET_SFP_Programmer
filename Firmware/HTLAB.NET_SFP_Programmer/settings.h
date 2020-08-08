@@ -12,9 +12,12 @@
 #define CLI_UNRECOG "% Unrecognized command"
 #define CLI_LINE_FEED "\r\n"
 
-#define SFP_DEFAULT_I2C_CLOCK 400000
 #define SFP_INTERNAL_PULLUP true
-
+#define SFP_I2C_CLOCK_DEFAULT 400000
+#define SFP_I2C_CLOCK_MIN 100000
+#define SFP_I2C_CLOCK_MAX 3400000
+#define SFP_CLOCK_TEST_ADDR 20
+#define SFP_CLOCK_TEST_INCREMENT 100000
 
 // ########## Settings ##########
 

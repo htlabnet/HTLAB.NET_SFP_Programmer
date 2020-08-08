@@ -41,7 +41,7 @@
 #include "version.h"
 
 const char VERSION[] = VER_BRANCH_STR "-" VER_RUN_NUM_STR "-" VER_RUN_ID_STR " @ " 
-                       VER_YEAR_STR "/" VER_MON_STR "/" VER_DATE_STR "-" 
+                       "20" VER_YEAR_STR "/" VER_MON_STR "/" VER_DATE_STR "-" 
                        VER_HOUR_STR ":" VER_MIN_STR ":" VER_SEC_STR;
 
 
@@ -59,8 +59,12 @@ void setup() {
   //cli_command_add("write", sfp_write, "SFP Write");
   //cli_command_add("read", sfp_read, "SFP Read");
   cli_command_add("status", sfp_status, "SFP Status");
+  
   cli_command_add("dump", sfp_dump, "Dump SFP ROM");
   cli_command_add("detect", sfp_detect, "Detect SFP I2C Bus");
+  cli_command_add("clocktest", sfp_clock_test, "Test SFP I2C Bus Clock Speed");
+  cli_command_add("clockset", sfp_clock_set, "Set SFP I2C Bus Clock Speed");
+  cli_command_add("clock", sfp_clock, "Show SFP I2C Bus Clock Speed");
 
   sfp_begin();
   show_version();
@@ -76,7 +80,7 @@ void loop() {
 void show_version() {
   Serial.println("######################################################################");
   Serial.println("");
-  Serial.println("    H T L A B . N E T    S F P    P r o g r a m m e r");
+  Serial.println("      H T L A B . N E T    S F P    P r o g r a m m e r");
   Serial.println("");
   Serial.println("      http://htlab.net/");
   Serial.println("");
