@@ -6,12 +6,15 @@ uint8_t line[CLI_BUFFER_SIZE];
 uint8_t *line_ptr;
 uint8_t *cursor_ptr;
 static command *cmd, *cmd_list;
+bool input_mode;
+uint8_t input_buffer[CLI_BUFFER_SIZE];
 
 void cli_begin(Serial_ &_Serial) {
   IO_Stream = &_Serial;
   line_ptr = line;
   *line_ptr = '\0';
   cmd_list = NULL;
+  input_mode = false;
   cli_command_add("help", cli_help, "Show Help");
   cli_init();
 }
@@ -34,11 +37,12 @@ void cli_task() {
       case 0x0A:  // LF
         *line_ptr = '\0';
         cli_cmd_parse((char *)line);
-        cli_send_return(true);
+        cli_send_return(!input_mode);
         line_ptr = line;
         cursor_ptr = line;
         *line_ptr = '\0';
-        
+        input_mode = false;
+
         if (IO_Stream->available() >= 1) {
           buf = IO_Stream->read();
           if (buf != '\n') {
@@ -73,7 +77,9 @@ void cli_task() {
             switch (IO_Stream->read()) {
               case 0x41:  // UP
               case 0x42:  // DOWN
-                cli_send(0x07);
+                if (!input_mode) {
+                  cli_send(0x07);
+                }
                 break;
               case 0x43:  // RIGHT
                 if (cursor_ptr < line_ptr) {
@@ -97,16 +103,22 @@ void cli_task() {
         break;
 
       case 0x3F:  // ?
-        cli_send(buf);
-        cli_send_return(false);
-        cli_help();
-        cli_send_return(true);
+        if (!input_mode) {
+          cli_send(buf);
+          cli_send_return(false);
+          cli_help();
+          cli_send_return(true);
+        } else {
+          cli_char_handler(buf);
+        }
         break;
 
       case 0x03:  // ETX (Ctrl + C)
+        input_mode = false;
         break;
 
       case 0x1A:  // SUB (Ctrl + Z)
+        input_mode = false;
         break;
 
       default:
@@ -114,6 +126,27 @@ void cli_task() {
         break;
     }
   }
+}
+
+
+char* cli_input_handler() {
+  input_mode = true;
+  line_ptr = line;
+  cursor_ptr = line;
+  *line_ptr = '\0';
+  while(true) {
+    cli_task();
+    if (!input_mode) break;
+  }
+  return (char *)input_buffer;
+}
+
+
+uint32_t cli_input_digit_handler() {
+  char *val;
+  val = cli_input_handler();
+  
+  return (uint32_t)atoi(val);
 }
 
 
@@ -125,6 +158,10 @@ void cli_char_handler(char buf) {
 
 
 void cli_cmd_parse(char *line) {
+  if (input_mode) {
+    strcpy((char *)input_buffer, line);
+    return;
+  }
   if (*line == '\0') {
     return;
   }

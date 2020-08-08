@@ -14,6 +14,8 @@ typedef struct _command {
 void cli_begin(Serial_ &_Stream);
 void cli_init();
 void cli_task();
+char* cli_input_handler();
+uint32_t cli_input_digit_handler();
 void cli_char_handler(char buf);
 void cli_cmd_parse(char *line);
 void cli_send(char c);
