@@ -55,11 +55,12 @@ void setup() {
   cli_begin(Serial);
 
   cli_command_add("version", show_version, "Show Version");
+  cli_command_add("writetest", sfp_write_test, "Test SFP ROM Write & Verify");
   //cli_command_add("password", sfp_password, "SFP Enter Password");
   //cli_command_add("write", sfp_write, "SFP Write");
   //cli_command_add("read", sfp_read, "SFP Read");
   cli_command_add("status", sfp_status, "SFP Status");
-  
+  cli_command_add("password", sfp_write_password_input, "Input Password");
   cli_command_add("dump", sfp_dump, "Dump SFP ROM");
   cli_command_add("detect", sfp_detect, "Detect SFP I2C Bus");
   cli_command_add("clocktest", sfp_clock_test, "Test SFP I2C Bus Clock Speed");

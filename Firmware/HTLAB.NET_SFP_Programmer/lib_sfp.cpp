@@ -12,73 +12,9 @@ void sfp_begin() {
 }
 
 
-void sfp_detect() {
-  cli_send("Detect");
-  cli_send_return(false);
-  for(uint8_t device = 1; device < 127; device++){
-    Wire.beginTransmission(device);
-    if (Wire.endTransmission() == 0) {
-      cli_send("  SFP I2C found at address 0x");
-      cli_send_hex(device);
-      cli_send(" ...!");
-      cli_send_return(false);
-    }
-  }
-  cli_send("Done");
-  cli_send_return(false);
-}
-
-
-void sfp_dump() {
-  cli_send("Dump");
-  cli_send_return(false);
-  cli_send_return(false);
-  for(uint8_t device = 1; device < 127; device++){
-    Wire.beginTransmission(device);
-    if (Wire.endTransmission() == 0) {
-      sfp_dump_list(device);
-    }
-  }
-  cli_send("Done");
-  cli_send_return(false);
-}
-
-
-void sfp_dump_list(uint8_t device) {
-  cli_send("  0x");
-  cli_send_hex(device);
-  cli_send("/  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F");
-  cli_send_return(false);
-  for(uint16_t i = 0; i <= 0xFF; i++){
-    if((i & 0x0F) == 0x00){
-      cli_send("  0x");
-      cli_send_hex(i);
-      cli_send(":");
-    }
-    cli_send(" ");
-    cli_send_hex(sfp_read_byte(device, i));
-    if((i & 0x0F) == 0x0F){
-      cli_send_return(false);
-    }
-  }
-  cli_send_return(false);
-}
-
-
-uint8_t sfp_read_byte(uint8_t device, uint8_t addr) {
+bool sfp_ready(uint8_t device) {
   Wire.beginTransmission(device);
-  Wire.write(addr);
-  if (Wire.endTransmission(false)) return 0x00;
-  Wire.requestFrom(device, 1);
-  return Wire.read();
-}
-
-
-uint8_t sfp_write_byte(uint8_t device, uint8_t addr, uint8_t data) {
-  Wire.beginTransmission(device);
-  Wire.write(addr);
-  Wire.write(data);
-  Wire.endTransmission();
+  return !Wire.endTransmission();
 }
 
 
@@ -156,6 +92,159 @@ void sfp_clock_test() {
   cli_send(String(i));
   cli_send(" Hz");
   cli_send_return(false);
+}
+
+
+void sfp_detect() {
+  cli_send("Detect");
+  cli_send_return(false);
+  for(uint8_t device = 1; device < 127; device++){
+    Wire.beginTransmission(device);
+    if (Wire.endTransmission() == 0) {
+      cli_send("  SFP I2C found at address 0x");
+      cli_send_hex(device);
+      cli_send(" ...!");
+      cli_send_return(false);
+    }
+  }
+  cli_send("Done");
+  cli_send_return(false);
+}
+
+
+void sfp_dump() {
+  cli_send("Dump");
+  cli_send_return(false);
+  cli_send_return(false);
+  for(uint8_t device = 1; device < 127; device++){
+    Wire.beginTransmission(device);
+    if (Wire.endTransmission() == 0) {
+      sfp_dump_list(device);
+    }
+  }
+  cli_send("Done");
+  cli_send_return(false);
+}
+
+
+void sfp_dump_list(uint8_t device) {
+  cli_send("  0x");
+  cli_send_hex(device);
+  cli_send("/  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F");
+  cli_send_return(false);
+  for(uint16_t i = 0; i <= 0xFF; i++){
+    if((i & 0x0F) == 0x00){
+      cli_send("  0x");
+      cli_send_hex(i);
+      cli_send(":");
+    }
+    cli_send(" ");
+    cli_send_hex(sfp_read_byte(device, i));
+    if((i & 0x0F) == 0x0F){
+      cli_send_return(false);
+    }
+  }
+  cli_send_return(false);
+}
+
+
+void sfp_write_password_input() {
+  cli_send("Write Password");
+  cli_send_return(false);
+  sfp_write_password(0);
+  cli_send("Done");
+  cli_send_return(false);
+}
+
+
+void sfp_write_password(uint32_t password) {
+  Wire.beginTransmission(0x51);
+  Wire.write(0x7B);
+  Wire.write((password >> 24) & 0xFF);
+  Wire.write((password >> 16) & 0xFF);
+  Wire.write((password >> 8) & 0xFF);
+  Wire.write(password & 0xFF);
+  Wire.endTransmission();
+  while(!sfp_ready(0x51)) {
+    delayMicroseconds(10);
+  }
+}
+
+
+void sfp_write_test() {
+  cli_send("Write Test");
+  cli_send_return(false);
+  cli_send_return(false);
+  for(uint8_t device = 1; device < 127; device++){
+    Wire.beginTransmission(device);
+    if (Wire.endTransmission() == 0) {
+      sfp_write_test_list(device);
+    }
+  }
+  cli_send("Done");
+  cli_send_return(false);
+}
+
+
+void sfp_write_test_list(uint8_t device) {
+  cli_send("  0x");
+  cli_send_hex(device);
+  cli_send("/  0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F");
+  cli_send_return(false);
+  for(uint16_t i = 0; i <= 0xFF; i++){
+    if((i & 0x0F) == 0x00){
+      cli_send("  0x");
+      cli_send_hex(i);
+      cli_send(":");
+    }
+    cli_send(" ");
+    if (device == 0x51 && i >= 123 && i <= 126) {
+      cli_send("##");
+    } else {
+      if (sfp_write_byte_test(device, i)) {
+        cli_send("OK");
+      } else {
+        cli_send("==");
+      }
+    }
+    if((i & 0x0F) == 0x0F){
+      cli_send_return(false);
+    }
+  }
+  cli_send_return(false);
+}
+
+
+bool sfp_write_byte_test(uint8_t device, uint8_t addr) {
+  uint8_t data;
+  data = sfp_read_byte(device, addr);
+  sfp_write_byte(device, addr, (data + 1));
+  if (sfp_read_byte(device, addr) == (data + 1)) {
+    sfp_write_byte(device, addr, data);
+    return true;
+  } else {
+    return false;
+  }
+}
+
+
+uint8_t sfp_read_byte(uint8_t device, uint8_t addr) {
+  Wire.beginTransmission(device);
+  Wire.write(addr);
+  if (Wire.endTransmission(false)) return 0x00;
+  Wire.requestFrom(device, 1);
+  return Wire.read();
+}
+
+
+uint8_t sfp_write_byte(uint8_t device, uint8_t addr, uint8_t data) {
+  Wire.beginTransmission(device);
+  Wire.write(addr);
+  Wire.write(data);
+  Wire.endTransmission();
+  while(!sfp_ready(device)) {
+    delayMicroseconds(10);
+  }
 }
 
 
