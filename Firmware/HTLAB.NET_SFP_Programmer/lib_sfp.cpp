@@ -49,7 +49,7 @@ void sfp_clock_set() {
     cli_send(String(clk));
     cli_send(" Hz");
   } else {
-    cli_send("ERROR");
+    cli_send("    ERROR");
   }
   cli_send_return(false);
 }
@@ -59,9 +59,9 @@ void sfp_clock_test() {
   // https://github.com/arduino/ArduinoCore-samd/issues/194
   cli_send("Clock Speed Test");
   cli_send_return(false);
-  Wire.beginTransmission(0x50);
+  Wire.beginTransmission(SFP_CLOCK_TEST_DEVICE);
   if (Wire.endTransmission() != 0) return;
-  uint8_t data = sfp_read_byte(0x50, SFP_CLOCK_TEST_ADDR);
+  uint8_t data = sfp_read_byte(SFP_CLOCK_TEST_DEVICE, SFP_CLOCK_TEST_ADDR);
   uint32_t i;
   for(i = SFP_I2C_CLOCK_MIN; i <= SFP_I2C_CLOCK_MAX; i = i + SFP_CLOCK_TEST_INCREMENT){
     cli_send("    Check ");
@@ -73,7 +73,7 @@ void sfp_clock_test() {
     Wire.begin();
     Wire.setClock(i);
     delay(10);
-    if (sfp_read_byte(0x50, SFP_CLOCK_TEST_ADDR) == data) {
+    if (sfp_read_byte(SFP_CLOCK_TEST_DEVICE, SFP_CLOCK_TEST_ADDR) == data) {
       // OK
       cli_send("OK");
     } else {
@@ -152,6 +152,19 @@ void sfp_write_password_input() {
   cli_send("Write Password");
   cli_send_return(false);
   sfp_write_password(0);
+
+  /*
+  for (uint8_t i = 0; i < 10; i++) {
+    cli_send(String(i));
+    if(sfp_check_valid_password(i)) {
+      cli_send(" : OK");
+    } else {
+      cli_send(" : NG");
+    }
+    cli_send_return(false);
+  }
+  */
+  
   cli_send("Done");
   cli_send_return(false);
 }
@@ -168,6 +181,12 @@ void sfp_write_password(uint32_t password) {
   while(!sfp_ready(0x51)) {
     delayMicroseconds(10);
   }
+}
+
+
+bool sfp_check_valid_password(uint32_t password) {
+  sfp_write_password(password);
+  return sfp_write_byte_test(SFP_PASSWORD_TEST_DEVICE, SFP_PASSWORD_TEST_ADDR);
 }
 
 

@@ -17,6 +17,7 @@ void sfp_dump();
 void sfp_dump_list(uint8_t device);
 void sfp_write_password_input();
 void sfp_write_password(uint32_t password);
+bool sfp_check_valid_password(uint32_t password);
 void sfp_write_test();
 void sfp_write_test_list(uint8_t device);
 bool sfp_write_byte_test(uint8_t device, uint8_t addr);
