@@ -8,6 +8,7 @@ uint8_t *cursor_ptr;
 static command *cmd, *cmd_list;
 bool input_mode;
 uint8_t input_buffer[CLI_BUFFER_SIZE];
+bool break_mode;
 
 void cli_begin(Serial_ &_Serial) {
   IO_Stream = &_Serial;
@@ -15,6 +16,7 @@ void cli_begin(Serial_ &_Serial) {
   *line_ptr = '\0';
   cmd_list = NULL;
   input_mode = false;
+  break_mode = false;
   cli_command_add("help", cli_help, "Show Help");
   cli_init();
 }
@@ -115,10 +117,12 @@ void cli_task() {
 
       case 0x03:  // ETX (Ctrl + C)
         input_mode = false;
+        break_mode = true;
         break;
 
       case 0x1A:  // SUB (Ctrl + Z)
         input_mode = false;
+        break_mode = true;
         break;
 
       default:
@@ -142,11 +146,17 @@ char* cli_input_handler() {
 }
 
 
-uint32_t cli_input_digit_handler() {
+int cli_input_int_handler() {
   char *val;
   val = cli_input_handler();
-  
-  return (uint32_t)atoi(val);
+  return atoi(val);
+}
+
+
+unsigned long cli_input_ulong_handler() {
+  char *val;
+  val = cli_input_handler();
+  return strtoul(val, NULL, 0);
 }
 
 
@@ -154,6 +164,16 @@ void cli_char_handler(char buf) {
   cli_send(buf);
   *line_ptr++ = buf;
   cursor_ptr++;
+}
+
+
+bool cli_break_handler() {
+  return break_mode;
+}
+
+
+void cli_break_clear() {
+  break_mode = false;
 }
 
 

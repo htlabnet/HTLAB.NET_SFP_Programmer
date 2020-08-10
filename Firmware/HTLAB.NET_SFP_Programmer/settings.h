@@ -20,6 +20,7 @@
 #define SFP_CLOCK_TEST_ADDR 20
 #define SFP_PASSWORD_TEST_DEVICE 0x50
 #define SFP_PASSWORD_TEST_ADDR 0
+#define SFP_ATTACK_SHOW_INFO_COUNT 10000
 
 // ########## Settings ##########
 

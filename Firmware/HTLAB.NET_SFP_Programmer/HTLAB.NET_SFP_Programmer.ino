@@ -92,6 +92,8 @@ void setup() {
   cli_command_add("clocktest", sfp_clock_test, "Test SFP I2C Bus Clock Speed");
   cli_command_add("clockset", sfp_clock_set, "Set SFP I2C Bus Clock Speed");
   cli_command_add("clock", sfp_clock, "Show SFP I2C Bus Clock Speed");
+  //cli_command_add("attackrev", sfp_attack_rev, "SFP Password Brute Force Attack Reverse");
+  cli_command_add("attack", sfp_attack, "SFP Password Brute Force Attack");
 
   sfp_begin();
   show_version();

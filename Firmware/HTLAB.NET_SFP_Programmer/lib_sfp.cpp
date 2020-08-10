@@ -18,6 +18,62 @@ bool sfp_ready(uint8_t device) {
 }
 
 
+void sfp_attack() {
+  cli_break_clear();
+  uint32_t offset, count, t_start, t_count;
+  cli_send("SFP Password Brute Force Attack");
+  cli_send_return(false);
+  cli_send("    >[0 - 4294967295]");
+  cli_send_return(false);
+  cli_send("    [OFFSET]>>>");
+  offset = cli_input_ulong_handler();
+  count = offset + SFP_ATTACK_SHOW_INFO_COUNT - 1;
+  t_start = millis();
+  do {
+    if(sfp_check_valid_password(offset)) {
+      sfp_show_valid_password(offset);
+      break;
+    }
+    if (offset == count) {
+      count = offset + SFP_ATTACK_SHOW_INFO_COUNT;
+      t_count = millis() - t_start;
+      cli_send("    ");
+      cli_send(String(offset - SFP_ATTACK_SHOW_INFO_COUNT + 1));
+      cli_send("-");
+      cli_send(String(offset));
+      cli_send("/4294967295 : ");
+      cli_send(String(t_count));
+      cli_send("ms (remaining ");
+      uint32_t time_left = (4294967295 - offset) / SFP_ATTACK_SHOW_INFO_COUNT * t_count / 1000;
+      cli_send(String(time_left));
+      cli_send("sec @ ");
+      if (time_left > 86400) {
+        time_left = time_left / 86400;
+        cli_send(String(time_left));
+        cli_send(" day)");
+      } else if (time_left > 3600) {
+        time_left = time_left / 3600;
+        cli_send(String(time_left));
+        cli_send(" hour)");
+      }
+      cli_send_return(false);
+      t_start = millis();
+    }
+    cli_task();
+    if (cli_break_handler()) break;
+    offset++;
+  } while(offset != 0);
+  cli_send("END");
+  cli_send_return(false);
+  
+}
+
+
+void sfp_attack_rev() {
+  
+}
+
+
 void sfp_clock() {
   cli_send("Clock Speed");
   cli_send_return(false);
@@ -39,7 +95,7 @@ void sfp_clock_set() {
   cli_send("] Hz");
   cli_send_return(false);
   cli_send("    [INPUT]>>>");
-  clk = cli_input_digit_handler();
+  clk = cli_input_ulong_handler();
   cli_send_return(false);
   if (SFP_I2C_CLOCK_MIN <= clk && clk <= SFP_I2C_CLOCK_MAX) {
     Wire.begin();
@@ -148,23 +204,33 @@ void sfp_dump_list(uint8_t device) {
 }
 
 
+void sfp_read() {
+  uint32_t device;
+  cli_send("Read");
+  cli_send_return(false);
+  cli_send("    >[0 - 127]");
+  cli_send_return(false);
+  cli_send("    [DEVICE]>>>");
+  device = cli_input_ulong_handler();
+  
+  cli_send(String(device));
+  cli_send_return(false);
+  
+}
+
+
 void sfp_write_password_input() {
+  uint32_t password;
   cli_send("Write Password");
   cli_send_return(false);
-  sfp_write_password(0);
-
-  /*
-  for (uint8_t i = 0; i < 10; i++) {
-    cli_send(String(i));
-    if(sfp_check_valid_password(i)) {
-      cli_send(" : OK");
-    } else {
-      cli_send(" : NG");
-    }
-    cli_send_return(false);
-  }
-  */
-  
+  cli_send("    >[0 - 4294967295]");
+  cli_send_return(false);
+  cli_send("    [INPUT]>>>");
+  password = cli_input_ulong_handler();
+  sfp_write_password(password);
+  cli_send("    ");
+  cli_send(String(password));
+  cli_send_return(false);
   cli_send("Done");
   cli_send_return(false);
 }
@@ -187,6 +253,33 @@ void sfp_write_password(uint32_t password) {
 bool sfp_check_valid_password(uint32_t password) {
   sfp_write_password(password);
   return sfp_write_byte_test(SFP_PASSWORD_TEST_DEVICE, SFP_PASSWORD_TEST_ADDR);
+}
+
+
+void sfp_show_valid_password(uint32_t password) {
+  cli_send_return(false);
+  cli_send("######################################################################");
+  cli_send_return(false);
+  cli_send_return(false);
+  cli_send("    Found Valid Password!");
+  cli_send_return(false);
+  cli_send_return(false);
+  cli_send("    32bit Password (decimal): ");
+  cli_send(String(password));
+  cli_send_return(false);
+  cli_send("    8bit * 4 Password (hex) :");
+  cli_send(" 0x");
+  cli_send_hex(password >> 24 & 0xFF);
+  cli_send(" 0x");
+  cli_send_hex(password >> 16 & 0xFF);
+  cli_send(" 0x");
+  cli_send_hex(password >> 8 & 0xFF);
+  cli_send(" 0x");
+  cli_send_hex(password & 0xFF);
+  cli_send_return(false);
+  cli_send_return(false);
+  cli_send("######################################################################");
+  cli_send_return(false);
 }
 
 
