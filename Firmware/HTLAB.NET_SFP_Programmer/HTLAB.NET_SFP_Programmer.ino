@@ -2,7 +2,7 @@
 // #####################################################################
 //
 //        HTLAB.NET SFP Programmer
-//          http://htlab.net/
+//          https://htlab.net/computer/network/arduino-sfp-programmer/
 //
 //        Copyright (C) 2020
 //          Hideto Kikuchi / PJ (@pcjpnet) - http://pc-jp.net/
@@ -111,7 +111,7 @@ void show_version() {
   Serial.println("");
   Serial.println("      H T L A B . N E T    S F P    P r o g r a m m e r");
   Serial.println("");
-  Serial.println("      http://htlab.net/");
+  Serial.println("      https://htlab.net/computer/network/arduino-sfp-programmer/");
   Serial.println("");
   Serial.println("      Copyright (C) 2020");
   Serial.println("        Hideto Kikuchi / PJ (@pcjpnet) - http://pc-jp.net/");
